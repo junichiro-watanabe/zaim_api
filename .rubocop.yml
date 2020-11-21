@@ -1,0 +1,13 @@
+inherit_from: .rubocop_todo.yml
+
+# 日本語でのコメントを許可
+AsciiComments:
+  Enabled: false
+
+# .frozen 不要
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+# "" の通常使用を許可
+Style/StringLiterals:
+  Enabled: false
