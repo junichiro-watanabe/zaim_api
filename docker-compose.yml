@@ -7,3 +7,5 @@ services:
       dockerfile: Dockerfile
     volumes:
       - .:/zaim_api
+    ports:
+      - 3000:3000
