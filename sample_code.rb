@@ -32,7 +32,11 @@ cgi = CGI.new
 session = CGI::Session.new(cgi)
 
 # ２．認証処理
-session['type'] = 'access' if session['type'] == 'authorize'
+if session['type'] == 'authorize' && \
+   !session['oauth_token'].nil? && \
+   !session['oauth_token_secret'].nil?
+  session['type'] = 'access'
+end
 
 # ３．アクセス処理
 if session['type'] == 'access'
@@ -40,8 +44,13 @@ if session['type'] == 'access'
 
 # １．token リクエスト処理
 else
+  request_token = oauth_consumer.get_request_token(callback_url: callback_url)
   session['type'] = 'authorize'
-  @content = 'created token'
+  session['oauth_token'] = request_token.token
+  session['oauth_token_secret'] = request_token.secret
+  authorize_url = request_token.authorize_url(callback_url: callback_url)
+  @content = "Click the link.<br />"
+  @content += "<a href=#{authorize_url}>#{authorize_url}</a>"
 end
 
 # html生成
