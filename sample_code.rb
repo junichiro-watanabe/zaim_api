@@ -28,37 +28,44 @@ oauth_consumer = OAuth::Consumer.new(consumer_key, consumer_secret,
 # 結果表示部分
 @content = ''
 
-# CGIインスタンス生成
-cgi = CGI.new
-session = CGI::Session.new(cgi)
+# 処理開始
+begin
+  # CGIインスタンス生成
+  cgi = CGI.new
+  session = CGI::Session.new(cgi)
 
-# ２．認証処理
-if session['type'] == 'authorize' && \
-   !session['oauth_token'].nil? && \
-   !session['oauth_token_secret'].nil?
+  # ２．認証処理
+  if session['type'] == 'authorize' && \
+     !session['oauth_token'].nil? && \
+     !session['oauth_token_secret'].nil?
 
-  request_token = OAuth::RequestToken.new(oauth_consumer, session['oauth_token'], session['oauth_token_secret'])
-  access_token = request_token.get_access_token(oauth_verifier: cgi.params[:oauth_verifier])
-  session['type'] = 'access'
-  session['oauth_token'] = access_token.token
-  session['oauth_token_secret'] = access_token.secret
-end
+    request_token = OAuth::RequestToken.new(oauth_consumer, session['oauth_token'], session['oauth_token_secret'])
+    access_token = request_token.get_access_token(oauth_verifier: cgi.params[:oauth_verifier])
+    session['type'] = 'access'
+    session['oauth_token'] = access_token.token
+    session['oauth_token_secret'] = access_token.secret
+  end
 
-# ３．アクセス処理
-if session['type'] == 'access'
-  access_token = OAuth::AccessToken.new(oauth_consumer, session['oauth_token'], session['oauth_token_secret'])
-  response = access_token.get(resource_url)
-  @content = JSON.parse(response.body)
+  # ３．アクセス処理
+  if session['type'] == 'access'
+    access_token = OAuth::AccessToken.new(oauth_consumer, session['oauth_token'], session['oauth_token_secret'])
+    response = access_token.get(resource_url)
+    @content = JSON.parse(response.body)
 
-# １．token リクエスト処理
-elsif session['type'].nil?
-  request_token = oauth_consumer.get_request_token(oauth_callback: callback_url)
-  session['type'] = 'authorize'
-  session['oauth_token'] = request_token.token
-  session['oauth_token_secret'] = request_token.secret
-  authorize_url = request_token.authorize_url(oauth_callback: callback_url)
-  @content = "Click the link.<br />"
-  @content += "<a href=#{authorize_url}>#{authorize_url}</a>"
+  # １．token リクエスト処理
+  elsif session['type'].nil?
+    request_token = oauth_consumer.get_request_token(oauth_callback: callback_url)
+    session['type'] = 'authorize'
+    session['oauth_token'] = request_token.token
+    session['oauth_token_secret'] = request_token.secret
+    authorize_url = request_token.authorize_url(oauth_callback: callback_url)
+    @content = "Click the link.<br />"
+    @content += "<a href=#{authorize_url}>#{authorize_url}</a>"
+  end
+
+# 例外処理
+rescue StandardError => e
+  @content = e.message
 end
 
 # html生成
