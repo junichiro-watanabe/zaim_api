@@ -2,11 +2,12 @@ require 'erb'
 require 'oauth'
 require 'cgi'
 require 'cgi/session'
+require 'json'
 
 ##### ユーザ固有情報を格納してください ###################################################
 consumer_key = "0ee0e839a43ec6c737070875125ca168da422175"     # コンシューマ ID
 consumer_secret = "b6e4eab08dc3e923cfc0eea342e56415c34c3814"  # コンシューマシークレット
-callback_url = 'https://localhost:3000'                       # コールバック先URL
+callback_url = 'http://localhost:3000'                        # コールバック先URL
 ########################################################################################
 
 # Zaim API 情報格納する
@@ -45,7 +46,9 @@ end
 
 # ３．アクセス処理
 if session['type'] == 'access'
-  @content = 'accessed'
+  access_token = OAuth::AccessToken.new(oauth_consumer, session['oauth_token'], session['oauth_token_secret'])
+  response = access_token.get(resource_url)
+  @content = JSON.parse(response.body)
 
 # １．token リクエスト処理
 elsif session['type'].nil?
