@@ -81,4 +81,5 @@ end
 # html生成
 erb = ERB.new(File.read("./sample_code.html.erb"))
 html = erb.result(binding)
+puts cgi.header
 puts html
