@@ -31,7 +31,6 @@ oauth_consumer = OAuth::Consumer.new(consumer_key, consumer_secret,
 # CGIインスタンス生成
 cgi = CGI.new
 session = CGI::Session.new(cgi)
-puts cgi.header
 
 # セッションクリア処理
 if !cgi.params['action'].empty? && \
